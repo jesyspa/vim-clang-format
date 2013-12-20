@@ -115,17 +115,12 @@ endif
 "}}}
 
 " format codes {{{
-function! s:detect_style_file()
-    let dirname = expand('%:p:h')
-    let dotfiles = map(split(globpath(dirname, '.*', 1), "\n"), 'filereadable(v:val)')
-    let style_file_name = has('win32') || has('win64') ? '_clang-format' : '.clang-format'
-    return filter(dotfiles, 'fnamemodify(v:val, ":t") ==# style_file_name') != []
-endfunction
-
 function! clang_format#format(line1, line2)
     let args = printf(" -lines=%d:%d", a:line1, a:line2)
-    if ! (g:clang_format#detect_style_file && s:detect_style_file())
+    if ! g:clang_format#detect_style_file
         let args .= printf(" -style=%s", s:make_style_options())
+    else
+        let args .= " -style=file"
     endif
     let args .= ' ' . g:clang_format#extra_args
     let clang_format = printf("%s %s --", g:clang_format#command, args)
